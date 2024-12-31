@@ -1,0 +1,33 @@
+WindowsでRubyインタプリタ組み込み手順(Rubyバージョンがruby 3.3.6 (2024-11-05 revision 75015d4c1f) [x64-mingw-ucrt]の場合の手順)
+	main.c や main.cpp などを用意し、rubyインタプリタ関係を使うコードを用意
+	例えば下記などを既存ソースに貼り付ける
+	// main.cpp
+ 	#include <iostream>
+	int main(int argc,char**argv){
+		ruby_sysinit(&argc, &argv);  // Rubyのシステム初期化(これないとセグメンテーション違反)
+        	ruby_init();
+		ruby_finalize();
+		std::cout << "hello world!" << std::endl;
+	}
+	その後に下記のようなコマンドを実行する。(パスは各自書き換え)
+		g++ -g -I"E:/windows/dev-tools/Ruby33-x64/include/ruby-3.3.0/" -I"E:/windows/dev-tools/Ruby33-x64/include/ruby-3.3.0/x64-mingw-ucrt/" main.cpp -o main.exe "E:/windows/dev-tools/Ruby33-x64/lib/libx64-ucrt-ruby330.dll.a"
+	その後にコンパイルエラー、リンクエラーなしを確認して実行。ただ注意。
+	ここで、もし前述コードなど実行時、ruby_init後の処理が実行されない場合はgdbで確認するとセグメンテーション違反が多い。
+	そのため、自身の環境では、
+		ruby_sysinit(&argc, &argv); 
+	のコードがruby_initより前に必ず必要であり、これがある場合うまくいった。
+	
+	rubyのコードをそのままコード内の文字列を埋め込んで実行する場合は、
+		rb_eval_string("p  'hello world!'")でよいが、
+	
+	スクリプトファイルから読み込みをしたい場合も注意が必要。
+	特に、
+		rb_loadを使う場合、実行時に謎のセグメンテーション違反のバグに遭遇するため、rb_load_protectを使用すること。
+	その場合、これも自身の環境ではうまくいった。
+	そのほかエラーはないが、基本的にはこれらの工程で他インタプリタの実装関数が使用可能になるはず。
+	また、使用するMinGWはRubyのアーキテクチャに合わせる必要があり、
+		Windowsかつ、RubyInstallerの場合、Ruby32bit+DevKitなどなら、
+		MinGWも32bitにする必要があり、逆もしかり。
+		ucrtやmsvcrtなどのオプションも考慮して、Rubyとコンパイラのバージョンやアーキテクチャは、基本合わせるべし。
+		ruby -vとgcc -vまたはg++ -vをすると両者ともバージョンやターゲットアーキテクチャを確認できる。
+

@@ -1,0 +1,7 @@
+build/*
+bin/*
+res/*
+*.dll
+
+!bin/.gitkeep
+!res/.gitkeep
