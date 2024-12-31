@@ -16,7 +16,8 @@ WindowsでRubyインタプリタ組み込み手順(Rubyバージョンがruby 3.
 	そのため、自身の環境では、
 		ruby_sysinit(&argc, &argv); 
 	のコードがruby_initより前に必ず必要であり、これがある場合うまくいった。
-	
+	というより、おそらくWindows環境の場合、ruby_sysinit(&argc, &argv);がruby_initより前にないと、内部的に色々と初期化できんっぽい。
+
 	rubyのコードをそのままコード内の文字列を埋め込んで実行する場合は、
 		rb_eval_string("p  'hello world!'")でよいが、
 	
