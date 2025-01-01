@@ -32,3 +32,25 @@ WindowsでRubyインタプリタ組み込み手順(Rubyバージョンがruby 3.
 		ucrtやmsvcrtなどのオプションも考慮して、Rubyとコンパイラのバージョンやアーキテクチャは、基本合わせるべし。
 		ruby -vとgcc -vまたはg++ -vをすると両者ともバージョンやターゲットアーキテクチャを確認できる。
 
+	後、なぜか標準ライブラリは一部しか使えない。$LOAD_PATHに含まれるPATHも何故かおかしな感じになっているため、
+	init.rbに書かれてるように
+$LOAD_PATH.clear
+paths = [
+  "E:/windows/dev-tools/Ruby33-x64/lib/ruby/site_ruby/3.3.0",
+  "E:/windows/dev-tools/Ruby33-x64/lib/ruby/site_ruby/3.3.0/x64-ucrt",
+  "E:/windows/dev-tools/Ruby33-x64/lib/ruby/site_ruby",
+  "E:/windows/dev-tools/Ruby33-x64/lib/ruby/vendor_ruby/3.3.0",
+  "E:/windows/dev-tools/Ruby33-x64/lib/ruby/vendor_ruby/3.3.0/x64-ucrt",
+  "E:/windows/dev-tools/Ruby33-x64/lib/ruby/vendor_ruby",
+  "E:/windows/dev-tools/Ruby33-x64/lib/ruby/3.3.0",
+  "E:/windows/dev-tools/Ruby33-x64/lib/ruby/3.3.0/win32",
+  "E:/windows/dev-tools/Ruby33-x64/lib/ruby/3.3.0/x64-mingw-ucrt",
+  "./"
+]
+
+# 新しいパスを$LOAD_PATHに追加
+paths.each do |path|
+  $LOAD_PATH.push(path.to_s)
+end
+のようなことが必要。ただ、それでも全く使えないものもある。理由はわからない。
+そのため、標準ライブラリは一部だけ。
