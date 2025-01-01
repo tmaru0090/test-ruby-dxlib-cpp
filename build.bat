@@ -19,9 +19,9 @@ if exist "bin\res" (
 
 
 
-@xcopy ".\script\" ".\bin\script\" /E /I /H
+@xcopy ".\script\" ".\bin\script\" /E /I /H /Y
 
-@xcopy ".\res\" ".\bin\res\" /E /I /H
+@xcopy ".\res\" ".\bin\res\" /E /I /H /Y
 
 @REM g++ -pthread -fPIC -g -I"E:/windows/dev-tools/Ruby33-x64/include/ruby-3.3.0/" -I"E:/windows/dev-tools/Ruby33-x64/include/ruby-3.3.0/x64-mingw-ucrt/" main.cpp -o main.exe "E:/windows/dev-tools/Ruby33-x64/lib/libx64-ucrt-ruby330.dll.a"
 

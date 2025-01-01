@@ -137,6 +137,9 @@ namespace RubyWrap{
             rb_define_method(dxlibClassObj,"set_always_run_flag",RubyGlueCode::__RUBY_SetAlwaysRunFlag,1);
             rb_define_method(dxlibClassObj,"message_box",RubyGlueCode::__RUBY_MessageBox,3);
        
+
+
+
         }
     }
 }

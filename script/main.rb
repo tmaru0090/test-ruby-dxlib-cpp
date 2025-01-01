@@ -2,6 +2,8 @@ require "./script/init"
 require "./script/dxlib_const_variables"
 
 
+
+
 dx = DxLib.new
 x= 0
 y = 100
