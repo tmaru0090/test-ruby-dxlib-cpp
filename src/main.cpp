@@ -6,7 +6,22 @@
 #include <windows.h>
 
 namespace RubyGlueCode{
+    std::wstring UTF8ToWString(const std::string& utf8Str) {
+        int len = MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1,NULL, 0);
+        std::wstring wstr(len, L'\0');
+        MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, &wstr[0], len);
+        wstr.pop_back(); // Null文字を削除
+        return wstr;
+    }
     extern "C"{
+        static VALUE __RUBY_MessageBox(VALUE self,VALUE title,VALUE text,VALUE utype){
+            std::string _title = StringValueCStr(title);
+            std::string _text = StringValueCStr(text);
+            std::wstring wtitle = UTF8ToWString(_title);
+            std::wstring wtext = UTF8ToWString(_text);
+            int res = MessageBoxW(NULL,wtext.c_str(),wtitle.c_str(),NUM2INT(utype));
+            return INT2NUM(res);
+        }    
         static VALUE __RUBY_DxLib_Init(VALUE self){
             int res = DxLib_Init();
             return INT2NUM(res);
@@ -58,8 +73,8 @@ namespace RubyGlueCode{
             return INT2NUM(res);
         }   
  
-        static VALUE __RUBY_LoadGraph(VALUE self,VALUE fileName){
-            int res = LoadGraph(StringValueCStr(fileName));
+        static VALUE __RUBY_LoadGraph(VALUE self,VALUE filename){
+            int res = LoadGraph(StringValueCStr(filename));
             return INT2NUM(res);
         }   
  
@@ -80,9 +95,19 @@ namespace RubyGlueCode{
             return INT2NUM(res);
         }   
 
+        static VALUE __RUBY_LoadMusicMem(VALUE self,VALUE filename){
+            int res = LoadMusicMem(StringValueCStr(filename));
+            return INT2NUM(res);
+        }
 
-
-
+        static VALUE __RUBY_PlayMusicMem(VALUE self,VALUE handle,VALUE playType){
+            int res = PlayMusicMem(NUM2INT(handle),NUM2INT(playType));
+            return INT2NUM(res);
+        }
+        static VALUE __RUBY_SetAlwaysRunFlag(VALUE self,VALUE flag){
+            int res = SetAlwaysRunFlag(NUM2INT(flag));
+            return INT2NUM(res);
+        }
     }
 }
 
@@ -105,8 +130,13 @@ namespace RubyWrap{
             rb_define_method(dxlibClassObj,"load_graph",RubyGlueCode::__RUBY_LoadGraph,1);
             rb_define_method(dxlibClassObj,"draw_graph",RubyGlueCode::__RUBY_DrawGraph,4);
             rb_define_method(dxlibClassObj,"draw_extend_graph",RubyGlueCode::__RUBY_DrawExtendGraph,6);
-        
             rb_define_method(dxlibClassObj,"check_hit_key",RubyGlueCode::__RUBY_CheckHitKey,1);
+
+            rb_define_method(dxlibClassObj,"load_music_mem",RubyGlueCode::__RUBY_LoadMusicMem,1);
+            rb_define_method(dxlibClassObj,"play_music_mem",RubyGlueCode::__RUBY_PlayMusicMem,2);
+            rb_define_method(dxlibClassObj,"set_always_run_flag",RubyGlueCode::__RUBY_SetAlwaysRunFlag,1);
+            rb_define_method(dxlibClassObj,"message_box",RubyGlueCode::__RUBY_MessageBox,3);
+       
         }
     }
 }
@@ -119,6 +149,8 @@ public:
     RubyInterpreter(int argc, char **argv,const std::string& filename){
         ruby_sysinit(&argc, &argv);  // Rubyのシステム初期化(これないとセグメンテーション違反)
         ruby_init();
+        ruby_set_argv(argc, argv);
+        ruby_init_loadpath();
         RubyWrap::registDxLibClass();
         this->filename = filename;
     }
