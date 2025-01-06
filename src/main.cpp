@@ -4,16 +4,17 @@
 #include <string>
 #include <DxLib.h>
 #include <windows.h>
-
-namespace RubyGlueCode{
-    std::wstring UTF8ToWString(const std::string& utf8Str) {
+ 
+std::wstring UTF8ToWString(const std::string& utf8Str) {
         int len = MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1,NULL, 0);
         std::wstring wstr(len, L'\0');
         MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, &wstr[0], len);
         wstr.pop_back(); // Null文字を削除
-        return wstr;
-    }
-    extern "C"{
+        return wstr;   
+}
+   
+extern "C"{
+    namespace RubyGlueCode{
         static VALUE __RUBY_MessageBox(VALUE self,VALUE title,VALUE text,VALUE utype){
             std::string _title = StringValueCStr(title);
             std::string _text = StringValueCStr(text);
@@ -111,8 +112,8 @@ namespace RubyGlueCode{
     }
 }
 
-namespace RubyWrap{
-    extern "C"{
+extern "C"{
+    namespace RubyWrap{
         static void registDxLibClass(){
             VALUE dxlibClassObj = rb_define_class("DxLib",rb_cObject);
             rb_define_method(dxlibClassObj,"dxlib_init",RubyGlueCode::__RUBY_DxLib_Init,0);
@@ -181,7 +182,12 @@ public:
 };
 
 int main(int argc, char **argv) {  
-    std::string filename("./script/main.rb");
+    //std::string filename("./script/main.rb");
+    if( argc <=1 ) {
+        std::cerr << "Usage [script.rb] --option" << std::endl;
+        return -1;
+    }
+    std::string filename = argv[1];
     RubyInterpreter ruby(argc,argv,filename);
     ruby.execute();
     return 0;
